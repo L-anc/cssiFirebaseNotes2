@@ -13,6 +13,12 @@ input::placeholder {
   /* color: var(--bg); */
 }
 
+.card-content {
+  overflow: hidden;
+  background: yellow;
+  /* color: var(--bg); */
+}
+
 .card.large {
   border-radius: 5px;
 }

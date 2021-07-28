@@ -1,53 +1,69 @@
+
 let googleUser;
+let googleUserName
 
-window.onload = (event) => {
-  // Use this to retain user state between html pages.
-  firebase.auth().onAuthStateChanged(function(user) {
-    if (user) {
-      console.log('Logged in as: ' + user.displayName);
-      googleUser = user;
-      getNotes(user.uid);
-    } else {
-      window.location = 'index.html'; // If not logged in, navigate back to login page.
-    }
-  });
-};
-
-function getNotes(userId){
-    console.log('getting notes for ', userId);
-    const notesRef = firebase.database().ref(`users/${userId}`)
-    notesRef.on('value', (db)=>{
-        const data = db.val();
-        renderData(data);
-    });
+function deleteNote(){
+    getNotes(user.uid);
+    firebase.database().ref('users/' + userId).remove();
 }
 
+window.onload = (event)=>{
+    firebase.auth().onAuthStateChanged(function(user){
+        if(user){
+            googleUser = user;
+            googleUserName = googleUser.displayName
+            getNotes(user.uid)
+        }
+    })
+}
+
+function getNotes(userID){
+  console.log(userID);
+  const notesRef = firebase.database().ref('users/' + userID);
+  notesRef.on("value", (db) =>{
+      const data = db.val();
+      renderData(data)
+      console.log(data)
+  })
+}
+
+
 function renderData(data){
-    let html = "";
+     let html = ''
     for(const dataKey in data){
         const note = data[dataKey];
-        const cardHtml = renderCard(note);
-        html += cardHtml;
-        //get card html
-        //add note data to html
+        const cardhtml = renderCard(note);
+        html += cardhtml;    
+
     }
-    document.querySelector('#app').innerHTML = html;
-    //add html to page
+
+    document.querySelector("#app").innerHTML = html
+}
+
+function generateRandomColor(){
+    return Math.floor(Math.random() * 225) + 1
 }
 
 function renderCard(note){
-    //convert note to html and return it
-    console.log(note);
-    return `
-        <div class="column is-one-quarter">
-            <div class="card">
-                <header class="card-header">
-                    <span class="card-header-title">${ note.title }</span>
-                </header>
-            </div>
-            <div class="card-content">
-                <div class="content">${ note.text }</div>
-            </div>
-        </div>
-    `;
+     // document.querySelector(".is-one-quarter").style.backgroundColor = ""
+     let color1 = generateRandomColor();
+        let color2 = generateRandomColor();
+        let color3 = generateRandomColor();
+        let rgb = `rgb(${color1}, ${color2}, ${color3})`;
+return `<div class="column is-one-quarter"  >
+         <div class="card" style='background: ${rgb}'>
+           <header class="card-header">
+             <p class="card-header-title">${note.title}</p>
+             <p  class="card-header-title">${googleUserName}</p>
+           </header>
+           <div class="card-content">
+             <div class="content">${note.text}</div>
+           </div>
+           <p class="has-text-centered">
+                <a class="button is-medium is-info is-outlined" onclick="deleteNote()">
+                    Delete
+                </a>
+           </p>
+         </div>
+       </div>`;
 }
